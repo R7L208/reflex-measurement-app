@@ -5,12 +5,12 @@ services:
     container_name: reflex-measurement-zookeeper
     image: wurstmeister/zookeeper
     ports:
-    - "2181:2181"
+      - "2181:2181"
   kafka:
     container_name: reflex-measurement-kafka
     image: wurstmeister/kafka
     ports:
-    - "9092:9092"
+      - "9092:9092"
     environment:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_LISTENERS:

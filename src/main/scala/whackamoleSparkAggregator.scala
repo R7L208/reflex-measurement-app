@@ -1,5 +1,5 @@
 import org.apache.spark.sql.streaming.{GroupState, GroupStateTimeout, OutputMode}
-import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
+import org.apache.spark.sql.{Dataset, SparkSession}
 
 object whackamoleSparkAggregator {
   val spark = SparkSession.builder()
@@ -12,6 +12,7 @@ object whackamoleSparkAggregator {
   import spark.implicits._
 
   case class UserResponse(sessionId: String, clickDuration: Long)
+
   case class UserAvgResponse(sessionId: String, avgDuration: Double)
 
   def readUserResponses(): Dataset[UserResponse] = spark.readStream
@@ -72,7 +73,7 @@ object whackamoleSparkAggregator {
         if (windowLength >= n) lastWindow.tail :+ record
         else lastWindow :+ record
 
-      // for Spark to give us access to the state in the next batch
+      // for Spark to give access to the state in the next batch
       state.update(newWindow)
 
       if (newWindow.length >= n) {
