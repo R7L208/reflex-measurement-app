@@ -57,13 +57,12 @@ object whackamoleSparkAggregator {
     61159462-0bb4-42b1-aa4b-ac242b3444a0,486
     window 4 = [542, 720, 768] = 676.6
   */
-  
+
   def updateUserResponseTime
-    (n: Int)
-    (sessionId: String, group: Iterator[UserResponse], state: GroupState[List[UserResponse]])
+  (n: Int)
+  (sessionId: String, group: Iterator[UserResponse], state: GroupState[List[UserResponse]])
   : Iterator[UserAvgResponse] = {
     group.flatMap { record =>
-
       val lastWindow =
         if (state.exists) state.get
         else List()
@@ -73,11 +72,11 @@ object whackamoleSparkAggregator {
         if (windowLength >= n) lastWindow.tail :+ record
         else lastWindow :+ record
 
-      // for Spark to give access to state in the next batch
+      // for Spark to give us access to the state in the next batch
       state.update(newWindow)
 
       if (newWindow.length >= n) {
-        val newAverage = newWindow.map(_.clickDuration).sum + 1.0 / n
+        val newAverage = newWindow.map(_.clickDuration).sum * 1.0 / n
         Iterator(UserAvgResponse(sessionId, newAverage))
       } else {
         Iterator()
@@ -85,7 +84,7 @@ object whackamoleSparkAggregator {
     }
   }
 
-  def getAverageResponseTime(n: Int): Unit = {
+  def getAverageResponseTime(n: Int) = {
     readUserResponses()
       .groupByKey(_.sessionId)
       .flatMapGroupsWithState(OutputMode.Append, GroupStateTimeout.NoTimeout())(updateUserResponseTime(n))
@@ -94,10 +93,10 @@ object whackamoleSparkAggregator {
       .outputMode("append")
       .start()
       .awaitTermination()
-
   }
 
-  def logUserResponses(): Unit = {
+
+  def logUserResponses() = {
     readUserResponses().writeStream
       .format("console")
       .outputMode("append")
